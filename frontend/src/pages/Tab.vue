@@ -21,6 +21,7 @@ import { isLoggedIn } from "../auth-client.js";
 import { getKeySignature } from "../util.ts";
 import { countIn } from "../count-in.ts";
 import { setupSelection } from "../selection.ts";
+import { setupNoteEditor } from "../note-editor.ts";
 
 const alphaTab = await import("@coderline/alphatab");
 const { ScrollMode, StaveProfile } = alphaTab;
@@ -81,7 +82,9 @@ export default defineComponent({
             savedPlaybackRange: null,
             playbackRangeRestoreTimer: undefined,
             selectionController: null,
+            noteEditorController: null,
             keepAwakeContext: null,
+            editMode: false,
 
             keyEvents: (e) => {
                 // Do not handle these tagName, because the only input is sync point, it is weird when play space to test the sync point
@@ -108,6 +111,36 @@ export default defineComponent({
                 } else if (e.code === "KeyS") {
                     e.preventDefault();
                     this.playFromFirstBarContainingNotes(-2);
+                } else if (e.code === "KeyE") {
+                    // Toggle edit mode
+                    e.preventDefault();
+                    this.editMode = !this.editMode;
+                } else if (this.editMode && this.noteEditorController) {
+                    // Edit mode keyboard shortcuts
+                    const selectedNote = this.noteEditorController.getSelectedNote();
+                    if (selectedNote) {
+                        if (e.code === "KeyT") {
+                            // Transpose to adjacent string (down)
+                            e.preventDefault();
+                            const targetString = selectedNote.string + 1;
+                            this.noteEditorController.transposeToString(targetString);
+                        } else if (e.code === "KeyY") {
+                            // Transpose to adjacent string (up)
+                            e.preventDefault();
+                            const targetString = selectedNote.string - 1;
+                            if (targetString >= 0) {
+                                this.noteEditorController.transposeToString(targetString);
+                            }
+                        } else if (e.code === "ArrowUp" && e.shiftKey) {
+                            // Increase fret
+                            e.preventDefault();
+                            this.noteEditorController.changeFret(selectedNote.fret + 1);
+                        } else if (e.code === "ArrowDown" && e.shiftKey) {
+                            // Decrease fret
+                            e.preventDefault();
+                            this.noteEditorController.changeFret(selectedNote.fret - 1);
+                        }
+                    }
                 }
             },
             setting: {},
@@ -873,6 +906,9 @@ export default defineComponent({
                 // Custom selection handles + "click keeps the selection" behavior
                 this.selectionController = setupSelection(this.$refs.bassTabContainer, this.api);
 
+                // Note editor for modifying individual notes
+                this.noteEditorController = setupNoteEditor(this.$refs.bassTabContainer, this.api, this.tabID);
+
                 // Used for showing/hiding the "Restart" button
                 this.api.playbackRangeChanged.on(() => {
                     this.playbackRange = this.api.playbackRange;
@@ -957,6 +993,11 @@ export default defineComponent({
                     // Get key signature
                     const firstBar = this.api.score.tracks[trackID].staves[0].bars[0];
                     this.keySignature = getKeySignature(firstBar);
+
+                    // Load saved note edits
+                    if (this.noteEditorController) {
+                        await this.noteEditorController.loadEditsFromBackend();
+                    }
 
                     // Set Audio source
                     this.currentAudio = this.getConfig("audio", "synth");

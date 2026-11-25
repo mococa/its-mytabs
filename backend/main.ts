@@ -795,6 +795,41 @@ export async function main() {
         }
     });
 
+    // Save note edits for a tab
+    app.post("/api/tab/:id/edits", async (c) => {
+        try {
+            await checkLogin(c);
+            const id = c.req.param("id");
+            await checkTabExists(id);
+
+            const body = await c.req.json();
+            const edits = body.edits || [];
+
+            // Store edits in KV store
+            await kv.set(["tab_edits", id], edits);
+
+            return c.json({ ok: true });
+        } catch (e) {
+            return generalError(c, e);
+        }
+    });
+
+    // Get note edits for a tab
+    app.get("/api/tab/:id/edits", async (c) => {
+        try {
+            await checkLogin(c);
+            const id = c.req.param("id");
+            await checkTabExists(id);
+
+            const result = await kv.get(["tab_edits", id]);
+            const edits = result.value || [];
+
+            return c.json({ edits });
+        } catch (e) {
+            return generalError(c, e);
+        }
+    });
+
     // Open folder and Open external (Windows only)
     app.post("/api/tab/:id/open-folder", async (c) => {
         try {
