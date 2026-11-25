@@ -21,7 +21,7 @@ import { isLoggedIn } from "../auth-client.js";
 import { getKeySignature } from "../util.ts";
 import { countIn } from "../count-in.ts";
 import { setupSelection } from "../selection.ts";
-import { setupNoteEditor } from "../note-editor.ts";
+import { setupNoteEditor } from "../tab-note-editor.ts";
 
 const alphaTab = await import("@coderline/alphatab");
 const { ScrollMode, StaveProfile } = alphaTab;
