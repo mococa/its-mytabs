@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://menina.moureau.dev/schema/v1/menina.schema.json
+version: 1
+project: its-mytabs
+environment: production
+
+defaults:
+  context: .
+  tag: latest
+
+storages:
+  tabs-data:
+    size: 500Mi
+    path: /app/data
+
+apps:
+  web:
+    context: .
+    service: { port: 47777 }
+    host: tabs.moureau.dev
+    replicas: 1
+    resources:
+      cpu: "200m"
+      memory: 256Mi
+    storage:
+      - tabs-data
