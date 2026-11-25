@@ -6,6 +6,7 @@ environment: production
 defaults:
   context: .
   tag: latest
+  registry: registry.moureau.dev
 
 storages:
   tabs-data:
@@ -15,6 +16,7 @@ storages:
 apps:
   web:
     context: .
+    dockerfile: Dockerfile
     service: { port: 47777 }
     host: tabs.moureau.dev
     replicas: 1
