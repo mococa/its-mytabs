@@ -35,7 +35,7 @@ COPY --chown=deno:deno ./backend /app/backend
 COPY --chown=deno:deno ./deno.jsonc /app/deno.jsonc
 
 # Extremely slow on multi-arch builds, copy from host instead
-COPY --chown=deno:deno --from=builder /app/frontend/dist /app/dist
+COPY --chown=deno:deno --from=builder /app/dist /app/dist
 #COPY --chown=deno:deno ./dist /app/dist
 
 # Install and cache dependencies
