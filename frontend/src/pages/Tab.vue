@@ -115,6 +115,7 @@ export default defineComponent({
                     // Toggle edit mode
                     e.preventDefault();
                     this.editMode = !this.editMode;
+                    console.log("Edit mode:", this.editMode);
                 } else if (this.editMode && this.noteEditorController) {
                     // Edit mode keyboard shortcuts
                     const selectedNote = this.noteEditorController.getSelectedNote();
@@ -908,6 +909,7 @@ export default defineComponent({
 
                 // Note editor for modifying individual notes
                 this.noteEditorController = setupNoteEditor(this.$refs.bassTabContainer, this.api, this.tabID);
+                console.log("Note editor initialized:", this.noteEditorController);
 
                 // Used for showing/hiding the "Restart" button
                 this.api.playbackRangeChanged.on(() => {
